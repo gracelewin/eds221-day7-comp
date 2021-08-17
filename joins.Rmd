@@ -1,0 +1,103 @@
+---
+title: "Joins"
+author: "Grace Lewin"
+date: "8/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(palmerpenguins)
+library(lubridate)
+```
+
+## Warm Up: data wrangling
+
+```{r}
+ex_1 <- penguins %>% 
+  filter(island %in% c("Biscoe", "Dream")) %>% 
+  select(-year, -sex) %>% # could also do select(-c(year, sex))
+  mutate(body_mass_kg = body_mass_g/1000) %>% 
+  rename(location = island) # new name = old name
+```
+
+
+```{r}
+ex_2 <- penguins %>% 
+  filter(species == "Adelie") %>% 
+  filter(!is.na(flipper_length_mm)) %>% # could also do drop_na(flipper_length_mm)
+  group_by(sex) %>% 
+  summarize(
+    mean_flip <- mean(flipper_length_mm),
+    sd_flip <- sd(flipper_length_mm),
+    sample_size = n()
+  )
+
+ex_2
+```
+
+
+## Joins practice
+
+## Mutating Joins
+
+```{r}
+animals <- tibble::tribble(
+  ~location,   ~species,  ~maturity,
+   "lagoon",   "bobcat",    "adult",
+    "bluff",   "coyote", "juvenile",
+    "creek",      "fox",    "adult",
+     "oaks", "squirrel", "juvenile",
+    "bluff",   "bobcat",    "adult"
+  )
+
+sites <- tibble::tribble(
+  ~location,      ~full_site_name, ~jurisdiction,
+    "beach",       "Goleta Beach",     "SB City",
+   "lagoon",        "UCSB Lagoon",        "UCSB",
+    "bluff",       "Ellwood Mesa",     "SB City",
+     "oaks", "Fremont Campground",        "USFS"
+  )
+```
+
+
+### Full Join
+
+everything from both data frames is returned, regardless of whether or not it has a match in the data frame it's being joined to.
+
+```{r}
+animals_full_join <- full_join(animals, sites)
+```
+
+### Left Join
+
+everything in x is kept. Things in y that have a matching key in x are joined to it. Things in y that do not have a matching key are dropped.
+
+```{r}
+animals_left_join <- left_join(animals, sites)
+```
+
+### Inner Join
+
+only keeps stuff if they have a key match in x and y.
+
+```{r}
+animals_inner_join <- inner_join(animals, sites)
+```
+
+## Filtering Joins
+
+### Semi join
+
+```{r}
+animals_semi_join <- semi_join(animals, sites, by = "location")
+```
+
+## Anti join
+
+```{r}
+animals_anti_join <- anti_join(sites, animals, by = "location")
+```
+
+
